@@ -4,7 +4,7 @@ using Microsoft.Extensions.Logging;
 
 namespace WebAppLocalStorage.Pages
 {
-    [Authorize]
+    [Authorize(Roles="Manager")]
     public class PrivacyModel : PageModel
     {
         private readonly ILogger<PrivacyModel> _logger;

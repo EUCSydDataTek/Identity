@@ -1,0 +1,20 @@
+﻿@page
+@model WebAppLocalStorage.Areas.Identity.Pages.Account.ListUsersModel
+@{
+    ViewData["Title"] = "List Users";
+}
+
+<h1>All Users</h1>
+<a asp-page="Register" class="btn btn-primary my-4">Create a User</a>
+
+<table class="table table-sm table-bordered">
+    <tr><th>ID</th><th>Name</th><th>Email</th></tr>
+    @foreach (var user in Model.Users)
+    {
+        <tr>
+            <td>@user.Id</td>
+            <td>@user.UserName</td>
+            <td>@user.Email</td>
+        </tr>
+    }
+</table>
