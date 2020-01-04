@@ -1,14 +1,16 @@
-[Introduction to Identity on ASP.NET Core](https://docs.microsoft.com/en-us/aspnet/core/security/authentication/identity)
+## Konfiguration af Identiy Services
+
+[Introduction to Identity on ASP.NET Core](https://docs.microsoft.com/en-us/aspnet/core/security/authentication/identity?view=aspnetcore-3.1&tabs=visual-studio#configure-identity-services)
 
 Viser default properties for Password, Lockout, User og Cookie indstillinger.
 
 [Læs mere hos Microsoft Docs](https://docs.microsoft.com/en-us/aspnet/core/security/authentication/identity-configuration?view=aspnetcore-2.2#password)
 
 
-# Udvidet policies
+## Udvidet policies
 
-## Creating Custom Password Policy
-[ref.](https://www.yogihosting.com/aspnet-core-identity-username-email-password-policy/)
+### Creating Custom Password Policy
+[Yogihosting.com](https://www.yogihosting.com/aspnet-core-identity-username-email-password-policy/)
 
 Man kan lave sin helt egen Password Policy ved at nedarve fra ```PasswordValidator```:
 
@@ -48,7 +50,7 @@ Password validation funktionen er defineret i `IPasswordValidator` og skal derfo
 services.AddTransient<IPasswordValidator<IdentityUser>, CustomPasswordPolicy>();
 ```
 
-## Email Policy in Identity
+### Email Policy in Identity
 
 På samme måde som vi lavede Password policies, kan man også benytte policies for Email (username)  vha. ```IdentiyOptions.User``` property.
 Tilføj følgende til ConfigureServices():
@@ -57,7 +59,7 @@ opts.User.RequireUniqueEmail = true;
 opts.User.AllowedUserNameCharacters = "abcdefghijklmnopqrstuvwxyz";
 ```
 
-## Creating Custom Username and Email Policy
+### Creating Custom Username and Email Policy
 
 Også her kan man lave custom policies ved at nedarve fra ```UserValidator<T>```:
 
