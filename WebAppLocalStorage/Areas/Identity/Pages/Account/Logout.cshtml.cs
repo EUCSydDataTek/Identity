@@ -29,18 +29,19 @@ namespace WebAppLocalStorage.Areas.Identity.Pages.Account
         public async Task<IActionResult> OnPost(string returnUrl = null)
         {
             await _signInManager.SignOutAsync();
-            await HttpContext.SignOutAsync(IdentityConstants.ExternalScheme);
 
             _logger.LogInformation("User logged out.");
+           
+            return Redirect("https://login.microsoftonline.com/common/oauth2/v2.0/logout?post_logout_redirect_uri=https://localhost:44377/identity/account/logout");
 
-            if (returnUrl != null)
-            {
-                return LocalRedirect(returnUrl);
-            }
-            else
-            {
-                return RedirectToPage();
-            }
+            //if (returnUrl != null)
+            //{
+            //    return LocalRedirect(returnUrl);
+            //}
+            //else
+            //{
+            //    return RedirectToPage();
+            //}
         }
     }
 }
