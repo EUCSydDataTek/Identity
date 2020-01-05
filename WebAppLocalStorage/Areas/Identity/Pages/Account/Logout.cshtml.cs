@@ -5,6 +5,8 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.Extensions.Logging;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authentication.OpenIdConnect;
+using Microsoft.AspNetCore.Authentication.Cookies;
 
 namespace WebAppLocalStorage.Areas.Identity.Pages.Account
 {
@@ -20,16 +22,16 @@ namespace WebAppLocalStorage.Areas.Identity.Pages.Account
             _logger = logger;
         }
 
-        public void OnGet()
+        public async void OnGet()
         {
         }
 
         public async Task<IActionResult> OnPost(string returnUrl = null)
         {
             await _signInManager.SignOutAsync();
-            _logger.LogInformation("User logged out.");
-
             await HttpContext.SignOutAsync(IdentityConstants.ExternalScheme);
+
+            _logger.LogInformation("User logged out.");
 
             if (returnUrl != null)
             {
