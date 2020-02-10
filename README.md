@@ -17,6 +17,11 @@ Klik på *Confirm your account* for at simulere Register confirmation via e-mail.
 
 Log in og klik på ```Hello<login-navn>``` for at lave **Manage your account**.
 
+
+#### Test Identiy
+Sæt `[Authorize]` på klassen for Privacy klassen og se at man kun får adgang hvis man er authentikeret.
+
+
 #### Undersøg Identity databasen
 
 
