@@ -12,6 +12,7 @@ public class RoleEdit
     public IEnumerable<IdentityUser> NonMembers { get; set; }
 }
 ```
+&nbsp;
 
 Opret ligeledes klassen **RoleModification**:
 ```c#
@@ -25,12 +26,13 @@ public class RoleModification
 }
 ```
 
-Tilføj den markerede linje i `Startup.cs`:
+Tilføj linjen med .AddRoles<> i `Startup.cs`:
 ```c#
 services.AddDefaultIdentity<IdentityUser>(options => options.SignIn.RequireConfirmedAccount = true)
-    **.AddRoles<IdentityRole>()**
+    .AddRoles<IdentityRole>()
     .AddEntityFrameworkStores<ApplicationDbContext>();
 ```
+&nbsp;
 
 ### Oprettelse af Pages til Roles Management
 Der oprettes en folder under *Areas | Identity | Pages* kaldet **Roles**.
@@ -72,6 +74,8 @@ Her oprettes 4 Pages i Roles-folderen:
     }
 </table>
 ```
+&nbsp;
+
 #### ListRoles.aspx.cs
 ```c#
 public class ListRolesModel : PageModel
@@ -88,6 +92,8 @@ public class ListRolesModel : PageModel
     public void OnGet() => Roles = _roleManager.Roles;
 }
 ```
+&nbsp;
+
 #### Create.aspx
 ```html
 @page
@@ -108,6 +114,8 @@ public class ListRolesModel : PageModel
     <button type="submit" class="btn btn-primary">Create</button>
 </form>
 ```
+&nbsp;
+
 #### Create.aspx.cs
 ```c#
 public class CreateModel : PageModel
@@ -141,6 +149,7 @@ public class CreateModel : PageModel
     }
 }
 ```
+&nbsp;
 
 #### Update.cshtml
 ```html
@@ -200,6 +209,8 @@ public class CreateModel : PageModel
     <button type="submit" class="btn btn-primary">Save</button>
 </form>
 ```
+&nbsp;
+
 #### Update.cshtml.cs
 ```c#
 public class UpdateModel : PageModel
@@ -277,6 +288,7 @@ public class UpdateModel : PageModel
     }
 }
 ```
+&nbsp;
 
 #### Update.cshtml
 ```html
@@ -288,6 +300,8 @@ public class UpdateModel : PageModel
 
 <h1>Delete</h1>
 ```
+&nbsp;
+
 #### Update.cshtml.cs
 ```c#
 public class DeleteModel : PageModel
@@ -327,7 +341,7 @@ public class DeleteModel : PageModel
 }
 ```
 
-
+&nbsp;
 #### Oprettelse af TagHelper
 Vi ønsker at ListRoles sidden kan vise en oversigt over hvilke brugere, der har hvilke roller. 
 Det kræver en TagHelper, kan omsætte et ID til brugerens Username:
