@@ -34,9 +34,9 @@ Secret Manager:
   }
 }
 ```
+&nbsp;
 
-
-#### Configuration i Startup.cs
+### Configuration i Startup.cs
 
 Tilføj følgende kode til Configuration():
 
@@ -47,19 +47,19 @@ services.AddAuthentication().AddMicrosoftAccount(microsoftOptions =>
     microsoftOptions.ClientSecret = Configuration["Authentication:Microsoft:ClientSecret"];
 });
 ```
+&nbsp;
+### Login
 
-#### Login
 Når der logges ind med Microsoft første gang bliver man præsenteret for en consent:
+
 ![Consent](Consent.png)
----
+
+Herefter får man mulighed for at forbinde sit Microsoft login med et lokalt login (som f.eks. kan benyttes til at styre roles):
 ![AssociateMSaccount](AssociateMSaccount.png)
-
----
-
-![RegisterConfirmation](RegisterConfirmation.png)
+&nbsp;
 
 
-#### Hvad gemmes i databasen?
+### Hvad gemmes i databasen?
 Her ses de to rows i databasen i AspNetUsers tabellen:
 
 ![AspNetUsers](AspNetUsers.png)
