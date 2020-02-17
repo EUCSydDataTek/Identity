@@ -1,19 +1,28 @@
 ## 5. Microsoft External Login
 [Microsoft Account external login](https://docs.microsoft.com/en-us/aspnet/core/security/authentication/social/microsoft-logins)
 
+Før demo: slet og update databasen ved at skrive følgende i PMB:
+```
+drop-database
+update-database
+```
+
 #### Installér MicrosoftAccount NuGet pakke
 Installer `Microsoft.AspNetCore.Authentication.MicrosoftAccount` NuGet package til projektet.
-
+&nbsp;
 
 #### Opret en app i Microsoft Developer Portal. 
 
 Log ind på [Azure portal - App registrations](https://go.microsoft.com/fwlink/?linkid=2083908) skole-konto: ecr@eucsyd.dk.
 
----
-Bemærk at man skal vælge 
+&nbsp;
+Bemærk at man under `Redirect URI` skal ændre IP og portnummer så det svarer til aktuel opsætning.
+&nbsp;
 ![Create app in MS Developer Portal](CreateApp.png)
+&nbsp;
 
 ![Create Secrets](CreateSecrets.png)
+&nbsp;
 
 #### Store the Microsoft client ID and client secret
 
@@ -53,6 +62,7 @@ services.AddAuthentication().AddMicrosoftAccount(microsoftOptions =>
 Når der logges ind med Microsoft første gang bliver man præsenteret for en consent:
 
 ![Consent](Consent.png)
+&nbsp;
 
 Herefter får man mulighed for at forbinde sit Microsoft login med et lokalt login (som f.eks. kan benyttes til at styre roles):
 ![AssociateMSaccount](AssociateMSaccount.png)
