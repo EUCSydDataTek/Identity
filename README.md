@@ -4,7 +4,7 @@
 ## Oprettelse af Role klasser Role-Service
 Der oprettes en folder under *Areas | Identity* kaldet **Models**.
 Her oprettes klassen **RoleEdit**:
-```cs
+```csharp
 public class RoleEdit
 {
     public IdentityRole Role { get; set; }
@@ -15,7 +15,7 @@ public class RoleEdit
 &nbsp;
 
 Opret ligeledes klassen **RoleModification**:
-```c#
+```csharp
 public class RoleModification
 {
     [Required]
@@ -27,7 +27,7 @@ public class RoleModification
 ```
 
 Tilføj linjen med .AddRoles<> i `Startup.cs`:
-```c#
+```csharp
 services.AddDefaultIdentity<IdentityUser>(options => options.SignIn.RequireConfirmedAccount = true)
     .AddRoles<IdentityRole>()
     .AddEntityFrameworkStores<ApplicationDbContext>();
@@ -77,7 +77,7 @@ Her oprettes 4 Pages i Roles-folderen:
 &nbsp;
 
 #### ListRoles.aspx.cs
-```c#
+```csharp
 public class ListRolesModel : PageModel
 {
     private readonly RoleManager<IdentityRole> _roleManager;
@@ -117,7 +117,7 @@ public class ListRolesModel : PageModel
 &nbsp;
 
 #### Create.aspx.cs
-```c#
+```csharp
 public class CreateModel : PageModel
 {
     private readonly RoleManager<IdentityRole> _roleManager;
@@ -212,7 +212,7 @@ public class CreateModel : PageModel
 &nbsp;
 
 #### Update.cshtml.cs
-```c#
+```csharp
 public class UpdateModel : PageModel
 {
     private readonly RoleManager<IdentityRole> _roleManager;
