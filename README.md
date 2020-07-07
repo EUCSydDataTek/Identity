@@ -10,8 +10,8 @@ Opdater databasen ved at klikke på knappen **Apply Migrations** på websiden elle
 #### Test og Login
 Web siden og klik på **Register** og opret:
 
-**User:** ecr@live.dk
-**Password:** P@ssw0rd
+**User:** 
+**Password:**
 
 Klik på *Confirm your account* for at simulere Register confirmation via e-mail.
 
