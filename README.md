@@ -290,7 +290,7 @@ public class UpdateModel : PageModel
 ```
 &nbsp;
 
-#### Update.cshtml
+#### Delete.cshtml
 ```html
 @page
 @model WebAppLocalStorage.Areas.Identity.Pages.Roles.DeleteModel
@@ -302,7 +302,7 @@ public class UpdateModel : PageModel
 ```
 &nbsp;
 
-#### Update.cshtml.cs
+#### Delete.cshtml.cs
 ```c#
 public class DeleteModel : PageModel
 {
