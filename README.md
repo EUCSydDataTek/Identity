@@ -387,3 +387,4 @@ Tilføj følgende til `Areas | |Identiy | Pages | _ViewImports`: `@addTagHelper We
 Sæt `[Authorize(Roles="Manager")]`  på siden Privacy.
 Læs mere her [Role-based authorization in ASP.NET Core](https://docs.microsoft.com/en-us/aspnet/core/security/authorization/roles?view=aspnetcore-3.1)
 
+https://stackoverflow.com/questions/50785009/how-to-seed-an-admin-user-in-ef-core-2-1-0

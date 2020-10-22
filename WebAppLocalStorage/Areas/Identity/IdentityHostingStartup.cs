@@ -6,6 +6,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using WebAppLocalStorage.Data;
+using WebAppLocalStorage.Utilities;
 
 [assembly: HostingStartup(typeof(WebAppLocalStorage.Areas.Identity.IdentityHostingStartup))]
 namespace WebAppLocalStorage.Areas.Identity
@@ -14,7 +15,8 @@ namespace WebAppLocalStorage.Areas.Identity
     {
         public void Configure(IWebHostBuilder builder)
         {
-            builder.ConfigureServices((context, services) => {
+            builder.ConfigureServices( (context, services) => {
+                
             });
         }
     }
