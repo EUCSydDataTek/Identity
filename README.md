@@ -23,5 +23,6 @@ Sæt `[Authorize]` på klassen for Privacy klassen og se at man kun får adgang hvi
 
 
 #### Undersøg Identity databasen
+Se ER-diagram
 
 
