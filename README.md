@@ -6,6 +6,7 @@ Viser default properties for Password, Lockout, User og Cookie indstillinger.
 
 [Læs mere hos Microsoft Docs](https://docs.microsoft.com/en-us/aspnet/core/security/authentication/identity-configuration?view=aspnetcore-2.2#password)
 
+&nbsp;
 
 ## Udvidet policies
 
@@ -50,6 +51,8 @@ Password validation funktionen er defineret i `IPasswordValidator` og skal derfo
 services.AddTransient<IPasswordValidator<IdentityUser>, CustomPasswordPolicy>();
 ```
 
+&nbsp;
+
 ### Email Policy in Identity
 
 På samme måde som vi lavede Password policies, kan man også benytte policies for Email (username)  vha. ```IdentiyOptions.User``` property.
@@ -58,6 +61,8 @@ Tilføj følgende til ConfigureServices():
 opts.User.RequireUniqueEmail = true;
 opts.User.AllowedUserNameCharacters = "abcdefghijklmnopqrstuvwxyz";
 ```
+
+&nbsp;
 
 ### Creating Custom Username and Email Policy
 
@@ -87,6 +92,8 @@ Denne klasse skal også registreres som en service i ConfigureServices():
 ```c#
 services.AddTransient<IUserValidator<IdentityUser>, CustomUsernameEmailPolicy>();
 ```
+
+&nbsp;
 
 ## Applying Password, Username and Email Policies when Updating a User Account
 
