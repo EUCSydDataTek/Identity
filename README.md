@@ -3,5 +3,5 @@
 
 Fortæl hvordan Scaffolding fungerer og hvordan Register, Login og Log out er fremkommet.
 
-Gennemgå Register, Log in og Log out Pages.
+Gennemgå *Register*, *Log in* og *Log out* Pages.
 
