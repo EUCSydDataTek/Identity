@@ -148,11 +148,6 @@ namespace WebAppLocalStorage.Utilities
 
 ```
 
-Tilføj linjen med .AddRoles<> i `Startup.cs`:
-```csharp
-services.AddDefaultIdentity<IdentityUser>(options => options.SignIn.RequireConfirmedAccount = true)
-    .AddRoles<IdentityRole>()
-    .AddEntityFrameworkStores<ApplicationDbContext>();
-```
+
 &nbsp;
 
