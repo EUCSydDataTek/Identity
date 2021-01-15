@@ -1,10 +1,13 @@
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Threading.Tasks;
+using WebAppLocalStorage.Data;
 using WebAppLocalStorage.Utilities;
 
 namespace WebAppLocalStorage
@@ -23,8 +26,11 @@ namespace WebAppLocalStorage
                     var userManager = services.GetRequiredService<UserManager<IdentityUser>>();
                     var roleManager = services.GetRequiredService<RoleManager<IdentityRole>>();
                     var dbInitializerLogger = services.GetRequiredService<ILogger<DbInitializer>>();
+                    var configuration = services.GetRequiredService<IConfiguration>();
+                    var context = services.GetRequiredService<ApplicationDbContext>();
+                    context.Database.Migrate();
 
-                    await DbInitializer.Initialize(userManager, roleManager, dbInitializerLogger);
+                    await DbInitializer.Initialize(userManager, roleManager, dbInitializerLogger, configuration);
                 }
                 catch (Exception ex)
                 {

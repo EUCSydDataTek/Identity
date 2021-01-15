@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Identity;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Threading.Tasks;
@@ -10,14 +11,20 @@ namespace WebAppLocalStorage.Utilities
         private static UserManager<IdentityUser> _userManager;
         private static RoleManager<IdentityRole> _roleManager;
         private static ILogger<DbInitializer> _logger;
+        private static IConfiguration _config;
 
-        public static async Task Initialize(UserManager<IdentityUser> userManager, RoleManager<IdentityRole> roleManager, ILogger<DbInitializer> logger)
+        public static async Task Initialize(UserManager<IdentityUser> userManager, RoleManager<IdentityRole> roleManager, ILogger<DbInitializer> logger, IConfiguration config)
         {
             _userManager = userManager;
             _roleManager = roleManager;
             _logger = logger;
+            _config = config;
 
-            var defaultUser = await CreateDefaultUser(_userManager, _logger, "ecr@live.dk", "P@ssw0rd");
+            // Get admin-credentials from UserManager and secrets.json
+            string adminUser = _config["AdminUser:UserId"];
+            string adminPassword = _config["adminUser:AdminPassword"];
+            var defaultUser = await CreateDefaultUser(_userManager, _logger, adminUser, adminPassword);
+
             await CreateRole(_roleManager, _logger, "Admin");
 
             if (!await _userManager.IsInRoleAsync(defaultUser, "Admin"))

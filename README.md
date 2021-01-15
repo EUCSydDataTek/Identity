@@ -1,29 +1,151 @@
-# 4. Roles Management
+# 4a.InitialAdminRoleUser
 [Yogihosting.com](https://www.yogihosting.com/aspnet-core-identity-roles/)
 
-## Oprettelse af Role klasser Role-Service
-Der oprettes en folder under *Areas | Identity* kaldet **Models**.
-Her oprettes klassen **RoleEdit**:
+## Oprettelse af ressourcerne i Program.cs
+Oprettelsen af faste brugere (f.eks. en administrator) og en Admin-rolle skal ske som noget af det allerførste når 
+applikationen starter op. Derfor sker det i Main() i Program-klassen. Bemærk også at der laves en Migration, således
+at man er sikker på at databasen er oprettet inden man går videre:
 ```csharp
-public class RoleEdit
+using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
+using System;
+using System.Threading.Tasks;
+using WebAppLocalStorage.Data;
+using WebAppLocalStorage.Utilities;
+
+namespace WebAppLocalStorage
 {
-    public IdentityRole Role { get; set; }
-    public IEnumerable<IdentityUser> Members { get; set; }
-    public IEnumerable<IdentityUser> NonMembers { get; set; }
+    public class Program
+    {
+        public static async Task Main(string[] args)
+        {
+            var host = CreateHostBuilder(args).Build();
+
+            using (var scope = host.Services.CreateScope())
+            {
+                var services = scope.ServiceProvider;
+                try
+                {
+                    var userManager = services.GetRequiredService<UserManager<IdentityUser>>();
+                    var roleManager = services.GetRequiredService<RoleManager<IdentityRole>>();
+                    var dbInitializerLogger = services.GetRequiredService<ILogger<DbInitializer>>();
+                    var configuration = services.GetRequiredService<IConfiguration>();
+                    var context = services.GetRequiredService<ApplicationDbContext>();
+                    context.Database.Migrate();
+
+                    await DbInitializer.Initialize(userManager, roleManager, dbInitializerLogger, configuration);
+                }
+                catch (Exception ex)
+                {
+                    var logger = services.GetRequiredService<ILogger<Program>>();
+                    logger.LogError(ex, "********** An error occurred while migrating the database.");
+                }
+            }
+
+            host.Run();
+        }
+
+        public static IHostBuilder CreateHostBuilder(string[] args) =>
+            Host.CreateDefaultBuilder(args)
+                .ConfigureWebHostDefaults(webBuilder =>
+                {
+                    webBuilder.UseStartup<Startup>();
+                });
+    }
 }
+
 ```
 &nbsp;
 
-Opret ligeledes klassen **RoleModification**:
+#### DbInitializer
+
+Opret  klassen **DbInitializer**, som benytter `RoleManager` og `UserManager` til at oprette en fast rolle *Admin* og en fast bruger,
+som er medlem af denne rolle.
+
+Bemærk at credentials for admin brugeren ikke er hardkodet, men hentes vha. `Secret Manager`, der kan læse en `secret.json` fil fra den lokale maskine.
+Læse mere om User
 ```csharp
-public class RoleModification
+using Microsoft.AspNetCore.Identity;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
+using System;
+using System.Threading.Tasks;
+
+namespace WebAppLocalStorage.Utilities
 {
-    [Required]
-    public string RoleName { get; set; }
-    public string RoleId { get; set; }
-    public string[] AddIds { get; set; }
-    public string[] DeleteIds { get; set; }
+    public class DbInitializer
+    {
+        private static UserManager<IdentityUser> _userManager;
+        private static RoleManager<IdentityRole> _roleManager;
+        private static ILogger<DbInitializer> _logger;
+        private static IConfiguration _config;
+
+        public static async Task Initialize(UserManager<IdentityUser> userManager, RoleManager<IdentityRole> roleManager, ILogger<DbInitializer> logger, IConfiguration config)
+        {
+            _userManager = userManager;
+            _roleManager = roleManager;
+            _logger = logger;
+            _config = config;
+
+            // Get admin-credentials from UserManager and secrets.json
+            string adminUser = _config["AdminUser:UserId"];
+            string adminPassword = _config["adminUser:AdminPassword"];
+            var defaultUser = await CreateDefaultUser(_userManager, _logger, adminUser, adminPassword);
+
+            await CreateRole(_roleManager, _logger, "Admin");
+
+            if (!await _userManager.IsInRoleAsync(defaultUser, "Admin"))
+            {
+                await _userManager.AddToRoleAsync(defaultUser, "admin");
+            }
+        }
+
+        private static async Task CreateRole(RoleManager<IdentityRole> roleManager, ILogger<DbInitializer> logger, string name)
+        {
+            if (!await _roleManager.RoleExistsAsync(name))
+            {
+                IdentityResult result = await roleManager.CreateAsync(new IdentityRole(name));
+                if (result.Succeeded)
+                {
+                    logger.LogDebug($"********** Created the role `{name}` successfully");
+                }
+                else
+                {
+                    ApplicationException exception = new ApplicationException($"********** Default role `{name}` cannot be created");
+                    throw exception;
+                }
+            }
+        }
+
+        private static async Task<IdentityUser> CreateDefaultUser(UserManager<IdentityUser> userManager, ILogger<DbInitializer> logger, string email, string password)
+        {
+            if (await _userManager.FindByNameAsync(email) == null)
+            {
+                IdentityResult identityResult = await userManager.CreateAsync(new IdentityUser { UserName = email, Email = email }, password);
+
+                if (identityResult.Succeeded)
+                {
+                    logger.LogDebug($"********** Created default user `{email}` successfully");
+                }
+                else
+                {
+                    ApplicationException exception = new ApplicationException($"********** Default user `{email}` cannot be created");
+                    throw exception;
+                }
+            }
+
+            IdentityUser createdUser = await userManager.FindByEmailAsync(email);
+
+            return createdUser;
+        }
+    }
 }
+
 ```
 
 Tilføj linjen med .AddRoles<> i `Startup.cs`:
@@ -34,357 +156,3 @@ services.AddDefaultIdentity<IdentityUser>(options => options.SignIn.RequireConfi
 ```
 &nbsp;
 
-### Oprettelse af Pages til Roles Management
-Der oprettes en folder under *Areas | Identity | Pages* kaldet **Roles**.
-
-Her oprettes 4 Pages i Roles-folderen:
-- ListRoles
-- Create
-- Update
-- Delete
-
-#### ListRoles.aspx
-```html
-@page
-@model WebAppLocalStorage.Areas.Identity.Pages.Roles.ListRolesModel
-@{
-    ViewData["Title"] = "ListRoles";
-}
-
-<h1>All Roles</h1>
-<a asp-page="Create" class="btn btn-primary my-4">Create a Role</a>
-
-<table class="table table-sm table-bordered table-bordered">
-    <tr><th>ID</th><th>Name</th><th>Users</th><th>Update</th><th>Delete</th></tr>
-    @foreach (var role in Model.Roles)
-    {
-        <tr>
-            <td>@role.Id</td>
-            <td>@role.Name</td>
-            <td i-role="@role.Id"></td>
-            <td><a class="btn btn-sm btn-primary" asp-page="Update" asp-route-id="@role.Id">Update</a></td>
-            <td>
-                <form asp-page="Delete" asp-page-handler="Delete" asp-route-id="@role.Id" method="post">
-                    <button type="submit" class="btn btn-sm btn-danger">
-                        Delete
-                    </button>
-                </form>
-            </td>
-        </tr>
-    }
-</table>
-```
-&nbsp;
-
-#### ListRoles.aspx.cs
-```csharp
-public class ListRolesModel : PageModel
-{
-    private readonly RoleManager<IdentityRole> _roleManager;
-
-    public ListRolesModel(RoleManager<IdentityRole> roleManager)
-    {
-        _roleManager = roleManager;
-    }
-
-    public IEnumerable<IdentityRole> Roles { get; set; }
-
-    public void OnGet() => Roles = _roleManager.Roles;
-}
-```
-&nbsp;
-
-#### Create.aspx
-```html
-@page
-@model WebAppLocalStorage.Areas.Identity.Pages.Roles.CreateModel
-@{
-    ViewData["Title"] = "Create";
-}
-
-<h1 class="bg-info text-white">Create a Role</h1>
-<a asp-action="Index" class="btn btn-secondary my-4">Back</a>
-<div asp-validation-summary="All" class="text-danger"></div>
-
-<form asp-action="Create" method="post">
-    <div class="form-group">
-        <label for="name">Name:</label>
-        <input name="name" class="form-control" />
-    </div>
-    <button type="submit" class="btn btn-primary">Create</button>
-</form>
-```
-&nbsp;
-
-#### Create.aspx.cs
-```csharp
-public class CreateModel : PageModel
-{
-    private readonly RoleManager<IdentityRole> _roleManager;
-    public CreateModel(RoleManager<IdentityRole> roleManager)
-    {
-        _roleManager = roleManager;
-    }
-
-    public void OnGet()
-    { }
-
-    public async Task<IActionResult> OnPost(string name)
-    {
-        if (ModelState.IsValid)
-        {
-            IdentityResult result = await _roleManager.CreateAsync(new IdentityRole(name));
-            if (result.Succeeded)
-                return RedirectToPage("./ListRoles");
-            else
-                Errors(result);
-        }
-        return Page();
-    }
-
-    private void Errors(IdentityResult result)
-    {
-        foreach (IdentityError error in result.Errors)
-            ModelState.AddModelError("", error.Description);
-    }
-}
-```
-&nbsp;
-
-#### Update.cshtml
-```html
-@page
-@model WebAppLocalStorage.Areas.Identity.Pages.Roles.UpdateModel
-@{
-    ViewData["Title"] = "Update";
-}
-
-<h1>Update Role</h1>
-<a asp-page="ListRoles" class="btn btn-outline-primary my-4">Back</a>
-<div asp-validation-summary="All" class="text-danger"></div>
-
-<form method="post">
-    <input type="hidden" name="roleName" value="@Model.RoleEdit.Role.Name" />
-    <input type="hidden" name="roleId" value="@Model.RoleEdit.Role.Id" />
-
-    <h2>Add To @Model.RoleEdit.Role.Name</h2>
-    <table class="table table-bordered table-sm">
-        @if (Model.RoleEdit.NonMembers.Count() == 0)
-        {
-            <tr><td colspan="2">All Users Are Members</td></tr>
-        }
-        else
-        {
-            @foreach (var user in Model.RoleEdit.NonMembers)
-            {
-                <tr>
-                    <td>@user.UserName</td>
-                    <td>
-                        <input type="checkbox" name="AddIds" value="@user.Id">
-                    </td>
-                </tr>
-            }
-        }
-    </table>
-
-    <h2>Remove From @Model.RoleEdit.Role.Name</h2>
-    <table class="table table-bordered table-sm">
-        @if (Model.RoleEdit.Members.Count() == 0)
-        {
-            <tr><td colspan="2">No Users Are Members</td></tr>
-        }
-        else
-        {
-            @foreach (var user in Model.RoleEdit.Members)
-            {
-                <tr>
-                    <td>@user.UserName</td>
-                    <td>
-                        <input type="checkbox" name="DeleteIds" value="@user.Id">
-                    </td>
-                </tr>
-            }
-        }
-    </table>
-    <button type="submit" class="btn btn-primary">Save</button>
-</form>
-```
-&nbsp;
-
-#### Update.cshtml.cs
-```csharp
-public class UpdateModel : PageModel
-{
-    private readonly RoleManager<IdentityRole> _roleManager;
-    private readonly UserManager<IdentityUser> _userManager;
-
-    public UpdateModel(RoleManager<IdentityRole> roleManager, UserManager<IdentityUser> userManager)
-    {
-        _roleManager = roleManager;
-        _userManager = userManager;
-    }
-
-    [BindProperty]
-    public RoleEdit RoleEdit { get; set; }
-
-    [BindProperty]
-    public RoleModification RoleModification { get; set; }
-
-    public async Task OnGet(string id)
-    {
-        IdentityRole role = await _roleManager.FindByIdAsync(id);
-        List<IdentityUser> members = new List<IdentityUser>();
-        List<IdentityUser> nonMembers = new List<IdentityUser>();
-        foreach (IdentityUser user in _userManager.Users)
-        {
-            var list = await _userManager.IsInRoleAsync(user, role.Name) ? members : nonMembers;
-            list.Add(user);
-        }
-        RoleEdit = new RoleEdit
-        {
-            Role = role,
-            Members = members,
-            NonMembers = nonMembers
-        };
-    }
-
-    public async Task<IActionResult> OnPost()
-    {
-        IdentityResult result;
-        if (ModelState.IsValid)
-        {
-            foreach (string userId in RoleModification.AddIds ?? new string[] { })
-            {
-                IdentityUser user = await _userManager.FindByIdAsync(userId);
-                if (user != null)
-                {
-                    result = await _userManager.AddToRoleAsync(user, RoleModification.RoleName);
-                    if (!result.Succeeded)
-                        Errors(result);
-                }
-            }
-            foreach (string userId in RoleModification.DeleteIds ?? new string[] { })
-            {
-                IdentityUser user = await _userManager.FindByIdAsync(userId);
-                if (user != null)
-                {
-                    result = await _userManager.RemoveFromRoleAsync(user, RoleModification.RoleName);
-                    if (!result.Succeeded)
-                        Errors(result);
-                }
-            }
-        }
-
-        if (ModelState.IsValid)
-            return RedirectToPage("ListRoles");
-        else
-            return Page();
-    }
-
-    private void Errors(IdentityResult result)
-    {
-        foreach (IdentityError error in result.Errors)
-            ModelState.AddModelError("", error.Description);
-    }
-}
-```
-&nbsp;
-
-#### Delete.cshtml
-```html
-@page
-@model WebAppLocalStorage.Areas.Identity.Pages.Roles.DeleteModel
-@{
-    ViewData["Title"] = "Delete";
-}
-
-<h1>Delete</h1>
-```
-&nbsp;
-
-#### Delete.cshtml.cs
-```c#
-public class DeleteModel : PageModel
-{
-    private readonly RoleManager<IdentityRole> _roleManager;
-
-    public DeleteModel(RoleManager<IdentityRole> roleManager)
-    {
-        _roleManager = roleManager;
-    }
-
-    public void OnGet()
-    {
-    }
-
-    public async Task<IActionResult> OnPostDeleteAsync(string id)
-    {
-        IdentityRole role = await _roleManager.FindByIdAsync(id);
-        if (role != null)
-        {
-            IdentityResult result = await _roleManager.DeleteAsync(role);
-            if (result.Succeeded)
-                return RedirectToPage("./ListRoles");
-            else
-                Errors(result);
-        }
-        else
-            ModelState.AddModelError("", "No role found");
-        return RedirectToPage("./ListRoles", _roleManager.Roles);
-    }
-
-    private void Errors(IdentityResult result)
-    {
-        foreach (IdentityError error in result.Errors)
-            ModelState.AddModelError("", error.Description);
-    }
-}
-```
-
-&nbsp;
-#### Oprettelse af TagHelper
-Vi ønsker at ListRoles sidden kan vise en oversigt over hvilke brugere, der har hvilke roller. 
-Det kræver en TagHelper, kan omsætte et ID til brugerens Username:
-
-Lav en folder og en klasse i roden af web app'en: `TagHelpers/RoleUsersTH.cs`:
-```c#
-[HtmlTargetElement("td", Attributes = "i-role")]
-public class RoleUsersTH : TagHelper
-{
-    private UserManager<IdentityUser> userManager;
-    private RoleManager<IdentityRole> roleManager;
-
-    public RoleUsersTH(UserManager<IdentityUser> usermgr, RoleManager<IdentityRole> rolemgr)
-    {
-        userManager = usermgr;
-        roleManager = rolemgr;
-    }
-
-    [HtmlAttributeName("i-role")]
-    public string Role { get; set; }
-
-    public override async Task ProcessAsync(TagHelperContext context, TagHelperOutput output)
-    {
-        List<string> names = new List<string>();
-        IdentityRole role = await roleManager.FindByIdAsync(Role);
-        if (role != null)
-        {
-            foreach (var user in userManager.Users)
-            {
-                if (user != null && await userManager.IsInRoleAsync(user, role.Name))
-                    names.Add(user.UserName);
-            }
-        }
-        output.Content.SetContent(names.Count == 0 ? "No Users" : string.Join(", ", names));
-    }
-}
-```
-
-Tilføj følgende til `Areas | |Identiy | Pages | _ViewImports`: `@addTagHelper WebAppLocalStorage.TagHelpers.*, WebAppLocalStorage`
-
-
-### Sæt Authorization på klassen
-Sæt `[Authorize(Roles="Manager")]`  på siden Privacy.
-Læs mere her [Role-based authorization in ASP.NET Core](https://docs.microsoft.com/en-us/aspnet/core/security/authorization/roles?view=aspnetcore-3.1)
-
-https://stackoverflow.com/questions/50785009/how-to-seed-an-admin-user-in-ef-core-2-1-0
