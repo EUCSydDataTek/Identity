@@ -66,7 +66,7 @@ Det er vigtigt at sikre sig at der er udført en indledende Migration, så det ikk
 ```c#
 public class Program
 {
-    public static async Task Main(string[] args)
+    public static void Main(string[] args)
     {
         var host = CreateHostBuilder(args).Build();
 
