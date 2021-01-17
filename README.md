@@ -56,8 +56,42 @@ services.AddAuthentication().AddMicrosoftAccount(microsoftOptions =>
     microsoftOptions.ClientSecret = Configuration["Authentication:Microsoft:ClientSecret"];
 });
 ```
+
 &nbsp;
-### Login
+
+### Configuration i Program.cs
+
+Det er vigtigt at sikre sig at der er udført en indledende Migration, så det ikke er den første bruger der selv skal trigge den:
+
+```c#
+public class Program
+{
+    public static async Task Main(string[] args)
+    {
+        var host = CreateHostBuilder(args).Build();
+
+        using (var scope = host.Services.CreateScope())
+        {
+            var services = scope.ServiceProvider;
+
+            var context = services.GetRequiredService<ApplicationDbContext>();
+            context.Database.Migrate();
+        }
+        host.Run();
+    }
+
+    public static IHostBuilder CreateHostBuilder(string[] args) =>
+        Host.CreateDefaultBuilder(args)
+            .ConfigureWebHostDefaults(webBuilder =>
+            {
+                webBuilder.UseStartup<Startup>();
+            });
+}
+``` 
+
+&nbsp;
+
+# Login
 
 Når der logges ind med Microsoft første gang bliver man præsenteret for en consent:
 
