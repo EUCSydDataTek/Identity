@@ -68,7 +68,21 @@ Opret  klassen **DbInitializer**, som benytter `RoleManager` og `UserManager` ti
 som er medlem af denne rolle.
 
 Bemærk at credentials for admin brugeren ikke er hardkodet, men hentes vha. `Secret Manager`, der kan læse en `secret.json` fil fra den lokale maskine.
-Læse mere om User
+Læse mere om User Secret. Her er skabelonen for User Secret:
+
+```json
+{
+  "AdminUser": 
+  {
+    "UserId": "ecr@live.dk",
+    "AdminPassword": "P@ssw0rd"
+  },
+}
+```
+
+&nbsp;
+
+
 ```csharp
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Configuration;
