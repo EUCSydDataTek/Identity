@@ -74,8 +74,8 @@ Læse mere om User Secret. Her er skabelonen for User Secret:
 {
   "AdminUser": 
   {
-    "UserId": "ecr@live.dk",
-    "AdminPassword": "P@ssw0rd"
+    "UserId": "userId",
+    "AdminPassword": "password"
   },
 }
 ```
