@@ -22,7 +22,7 @@ namespace WebAppLocalStorage.Areas.Identity.Pages.Account
             _logger = logger;
         }
 
-        public async void OnGet()
+        public void OnGet()
         {
         }
 
