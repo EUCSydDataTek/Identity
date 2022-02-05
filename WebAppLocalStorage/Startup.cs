@@ -58,15 +58,24 @@ namespace WebAppLocalStorage
 
                 options.LoginPath = "/Identity/Account/Login";
                 options.AccessDeniedPath = "/Identity/Account/AccessDenied";
-                options.SlidingExpiration = true; 
+                options.SlidingExpiration = true;
             });
 
-            // Microsoft account External Login via Oauth2
+            // Microsoft External Login 
             services.AddAuthentication().AddMicrosoftAccount(microsoftOptions =>
             {
                 microsoftOptions.ClientId = Configuration["Authentication:Microsoft:ClientId"];
                 microsoftOptions.ClientSecret = Configuration["Authentication:Microsoft:ClientSecret"];
             });
+
+            // Google External Login 
+            //services.AddAuthentication()
+            //.AddGoogle(options =>
+            //{
+            //    IConfigurationSection googleAuthNSection = Configuration.GetSection("Authentication:Google");
+            //    options.ClientId = googleAuthNSection["ClientId"];
+            //    options.ClientSecret = googleAuthNSection["ClientSecret"];
+            //});
         }
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
